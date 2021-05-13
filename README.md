@@ -1,5 +1,4 @@
-# ADSK-SA-2020-0003-Tools# ADSK-SA-2020-0003-Tools
-
+# ADSK-SA-2020-0003-Tools#
 Source and Go binaries for detection and eradication of a third-party malicious script enbedded in Autodesk Maya scene files indicated as SEVERE.  A vulnerability, which if exploited, would directly impact the confidentiality, integrity or availability of user’s data or processing resources.
 
 The malware is malicious and destructive, modifying the source scene file upon save by deleting script nodes within the scene, as well as modification of the user's environment, startup scripts, and multiple mel files in the Maya installation.
