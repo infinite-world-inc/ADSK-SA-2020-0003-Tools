@@ -9,8 +9,9 @@ import json
 import os
 
 # source_path = r'D:\shotgun\source_files'
-source_path = r'D:\shotgun\202103'
+source_path = r'D:\shotgun\test'
 fix_path = r'D:\shotgun\fix_phage'
+DEBUG = True
 
 def process(sg):
     """process shotgun files
@@ -28,10 +29,13 @@ def process(sg):
         ['filename', 'ends_with', '.mb'],
         ['filename', 'ends_with', '.ma']]
 
+    test_asset = {'type': 'Asset', 'id': 109460}  # demo couch
+
     filters = [
         # ['id', 'in', [1717073, 1659356, 1073338]],
         # ['created_at', 'greater_than', datetime.datetime(2021, 4, 16)],
-        ['created_at', 'in_calendar_month', -2],
+        ['attachment_links.PublishedFile.entity', 'in', [test_asset]],
+        # ['created_at', 'in_calendar_month', -2],
         # ['tags', 'not_in', tags],
         {'filter_operator': 'any',
                             'filters': any_filters}
@@ -47,6 +51,7 @@ def process(sg):
     for attachment in attachments:
         print('Processing: {}'.format(attachment.get('filename')))
         (path, time, file_size) = _download_file(sg, attachment)
+
         if not time:
             continue
 
@@ -61,14 +66,18 @@ def process(sg):
 
         start_time = datetime.datetime.now()
         suspect = open(path, 'rb').read()
-        if b'phage' in suspect:
+        if b'phage' in suspect or DEBUG:
             end_time = datetime.datetime.now()
             if not total_scan_time:
                 total_scan_time = end_time - start_time
             else:
                 total_scan_time = total_scan_time + end_time - start_time
 
-            print('****  Bad: {} - Time for search: {}  ****'.format(path, (end_time-start_time)))
+            if DEBUG:
+                print('****  DEBUG: {} - Time for search: {}  ****'.format(path, (end_time-start_time)))
+            else:
+                print('****  Bad: {} - Time for search: {}  ****'.format(path, (end_time-start_time)))
+            
             bad.append(path)
             attachment['source_file'] = path
             attachment['source_file_id'] = attachment['id']
@@ -76,8 +85,8 @@ def process(sg):
             attachment['updated_at'] = None
             source_files[os.path.basename(path)] = attachment
 
-            with open(os.path.join(source_path, 'source_files.json'), 'a') as f:
-                f.write(json.dumps(source_files, indent=4))
+            with open(os.path.join(source_path, 'source_files.json'), 'w') as f:
+                json.dump(source_files, f, indent=4)
             sg.update("Attachment", attachment['id'], {'tags': tags})
         else:
             end_time = datetime.datetime.now()
@@ -94,13 +103,15 @@ def process(sg):
     print('Total Scan Time:     {}'.format(total_scan_time))
     print('Total Download Time: {}\n'.format(total_time))
 
+
+    _upload_files(sg, source_path)
+
 def _download_file(sg, attachment):
     date = attachment['created_at']
 
     source_file = 'source_{}{:02d}{:02d}_{}_{}'.format(date.year, date.month, date.day, attachment['id'], attachment.get('filename'))
     source_path_file = os.path.join(source_path, source_file)
 
-    # attachment = {'type': 'Attachment', 'id': attachment_id }
     if os.path.isfile(source_path_file):
         return (None, None, 0)
 
@@ -112,6 +123,14 @@ def _download_file(sg, attachment):
     print('Download time:  {}\t\t\tFile Size:  {}'.format(total_time, file_size))
     
     return (source_path_file, total_time, file_size)
+
+def _upload_files(sg, source_path):
+    with open(os.path.join(source_path, 'source_files.json'), 'r') as f:
+        attachments = json.load(f)
+
+    for attachment in attachments:
+        print(attachment)
+        # sg.update("Attachment", attachment['id'], {'tags': tags})
 
 
 if __name__ == '__main__':
