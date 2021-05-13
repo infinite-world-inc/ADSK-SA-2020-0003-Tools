@@ -2,7 +2,7 @@
 
 Scripts for detection and eradication of a third-party malicious script enbedded in Autodesk Maya scene files.
 
-The malware is malicious and destructive, modifying the source scene file upon save by deleting script nodes within the scen.
+The malware is malicious and destructive, modifying the source scene file upon save by deleting script nodes within the scene, as well as modification of the user's environment, startup scripts, and multiple mel files in the Maya installation.
 
 The issue was identified and a fix has been made available by Autodesk and labeled as Autodesk ID: ADSK-SA-2020-0003. The script can execute malicious code that can corrupt the Maya environment, cause data loss and instability, as well as spread to other systems.
 
