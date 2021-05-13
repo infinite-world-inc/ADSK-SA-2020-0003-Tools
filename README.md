@@ -1,6 +1,6 @@
 # ADSK-SA-2020-0003-Tools# ADSK-SA-2020-0003-Tools
 
-Scripts for detection and eradication of a third-party malicious script enbedded in Autodesk Maya scene files.
+Source and Go binaries for detection and eradication of a third-party malicious script enbedded in Autodesk Maya scene files indicated as SEVERE.  A vulnerability, which if exploited, would directly impact the confidentiality, integrity or availability of user’s data or processing resources.
 
 The malware is malicious and destructive, modifying the source scene file upon save by deleting script nodes within the scene, as well as modification of the user's environment, startup scripts, and multiple mel files in the Maya installation.
 
@@ -12,4 +12,6 @@ IMPORTANT limitations of the Autodesk code include the inability to detect malic
 
 You can access the Autodesk mitigation tools here: https://apps.autodesk.com/MAYA/en/Detail/Index?id=8637238041954239715
 
-Our tools are provided as source and a single Windows, Linux and MacOS binaries which can be run on volumens containing infected files, but we advise you use this code to construct inline mitigation tools that automate this process within your environment.
+Our tools are provided as both source and as a single Windows, Linux or MacOS binary which can be run on volumens containing infected files.  Infected files in the current user's home directory will also be located.  
+
+We advise you use this code to construct inline mitigation tools that automate this process within your environment.
