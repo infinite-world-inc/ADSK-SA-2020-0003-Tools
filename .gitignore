@@ -1,0 +1,14 @@
+.DS_Store
+env.list
+oauth2.dat
+.python-version
+.vscode
+
+*.json
+*.pyc
+*.code-workspace
+
+bin/
+env/
+.idea/
+.qt_for_python/
