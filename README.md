@@ -31,6 +31,7 @@ We advise you use this code to construct inline mitigation tools that automate t
 ## Flags
 
 ```
+-h  full usage / help
 -c	detect and clean (default is detect only)
 -v	version
 ```
