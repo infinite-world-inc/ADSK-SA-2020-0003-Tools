@@ -32,8 +32,8 @@ We advise you use this code to construct inline mitigation tools that automate t
 
 ```
 -h  full usage / help
--c	detect and clean (default is detect only)
--v	version
+-c  detect and clean (default is detect only)
+-v  version
 ```
 
 ## Examples
