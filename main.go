@@ -132,7 +132,11 @@ func processFile(path string, fi os.FileInfo, err error) error {
 			return
 		}
 		if *cleanFlag {
-			fmt.Println("INFECTED and CLEANING:", path)
+			if isText {
+				fmt.Println("INFECTED and CLEANING:", path)
+			} else {
+				fmt.Println("INFECTED and RENAMING:", path)
+			}
 			if err := cleanFile(path, isText); err != nil {
 				fmt.Println("INFECTED unable to clean:", path)
 			}
