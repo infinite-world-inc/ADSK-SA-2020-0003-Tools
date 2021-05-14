@@ -184,7 +184,9 @@ func detectHomeDir() bool {
 func cleanHomeDir() {
 	home, _ := os.UserHomeDir()
 	os.Remove(path.Join(home, "Documents", "maya", "scripts", "vaccine.py"))
+	os.Remove(path.Join(home, "Documents", "maya", "scripts", "vaccine.pyc"))
 	os.Remove(path.Join(home, "Documents", "maya", "scripts", "userSetup.py"))
+	os.Remove(path.Join(home, "Documents", "maya", "scripts", "userSetup.pyc"))
 	os.Remove(path.Join(home, "Documents", "maya", "scripts", "userSetup.mel"))
 }
 
