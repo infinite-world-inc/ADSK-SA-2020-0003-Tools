@@ -40,8 +40,8 @@ func main() {
 	cleanFlag = flag.Bool("c", false, "detect and clean (default is detect only)")
 
 	flag.Usage = func() {
-		fmt.Println("Usage: dephage [-c | -v] [root-folder]")
-		fmt.Println("Version: v1.1.0")
+		fmt.Println("Usage: dephage [-c | -v] <file-path>|<folder-path>")
+		fmt.Println("Version: v1.2.0")
 		fmt.Println()
 		fmt.Println("Detects and optionally cleans the ADSK-SA-2020-0003 Autodesk Maya virus.")
 		fmt.Println("\nInfected text .ma and .mb files will be cleaned and the original file")
@@ -53,43 +53,40 @@ func main() {
 		flag.PrintDefaults()
 		fmt.Println()
 		fmt.Println("Examples:")
-		fmt.Println("  Detect from current folder.")
-		fmt.Println("    dephage")
+		fmt.Println("  Detect file.")
+		fmt.Println("    dephage documents/maya/file.ma")
 		fmt.Println()
-		fmt.Println("  Detect from selected folder.")
+		fmt.Println("  Detect folder and all sub-folders.")
 		fmt.Println("    dephage documents/maya")
 		fmt.Println()
-		fmt.Println("  Detect and clean from current folder.")
-		fmt.Println("    dephage -c")
+		fmt.Println("  Detect and clean file.")
+		fmt.Println("    dephage -c documents/maya/file.ma")
 		fmt.Println()
-		fmt.Println("  Detect and clean selected folder.")
+		fmt.Println("  Detect and clean folder and all subfolders.")
 		fmt.Println("    dephage -c documents/maya")
 	}
 
 	flag.Parse()
 
 	if *versionFlag {
-		fmt.Println("dephage v1.1.0")
+		fmt.Println("dephage v1.2.0")
 		return
 	}
 
 	pathArg := flag.Arg(0)
 	if pathArg == "" {
-		pathArg = "."
+		flag.Usage()
+		return
 	}
 
 	fi, err := os.Stat(pathArg)
 	if err != nil {
-		fmt.Println("ERROR unable to read folder:", pathArg)
-		return
-	}
-	if !fi.IsDir() {
-		fmt.Println(pathArg, "is not a folder")
+		fmt.Println("ERROR unable to read:", pathArg)
 		return
 	}
 
 	absPath, _ := filepath.Abs(pathArg)
-	fmt.Println("Processing folder:", absPath)
+	fmt.Println("Processing:            ", absPath)
 
 	homePath, _ := os.UserHomeDir()
 	mayaPath := path.Join(homePath, "Documents", "maya", "scripts")
@@ -108,20 +105,33 @@ func main() {
 		}
 	}
 
-	if err := filepath.Walk(pathArg, processFile); err != nil {
-		fmt.Println("ERROR: unable to read folder:", err)
+	if fi.IsDir() {
+		processDir(pathArg)
+	} else {
+		processFile(pathArg)
 	}
 
 	wg.Wait()
 }
 
-func processFile(path string, fi os.FileInfo, err error) error {
-	if fi.IsDir() {
-		return nil
-	}
+func processDir(pathArg string) {
+	err := filepath.Walk(pathArg, func(path string, fi os.FileInfo, err error) error {
+		if fi.IsDir() {
+			return nil
+		}
 
-	if !(strings.HasSuffix(path, ".ma") || strings.HasSuffix(path, ".mb")) {
+		processFile(path)
 		return nil
+	})
+
+	if err != nil {
+		fmt.Println("ERROR: unable to read folder:", err)
+	}
+}
+
+func processFile(path string) {
+	if !(strings.HasSuffix(path, ".ma") || strings.HasSuffix(path, ".mb")) {
+		return
 	}
 
 	wg.Add(1)
@@ -144,8 +154,6 @@ func processFile(path string, fi os.FileInfo, err error) error {
 			fmt.Println("INFECTED:", path)
 		}
 	}()
-
-	return nil
 }
 
 func detectHomeDir() bool {

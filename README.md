@@ -18,7 +18,7 @@ We advise you use this code to construct inline mitigation tools that automate t
 
 # Usage
 
-    dephage [-c | -v] [root-folder]
+    dephage [-c | -v] <file-path>|<folder-path>
 
 * Detects and optionally cleans the ADSK-SA-2020-0003 Autodesk Maya virus.
 
@@ -31,32 +31,25 @@ We advise you use this code to construct inline mitigation tools that automate t
 ## Flags
 
 ```
--c	detect and clean (default is detect only)
+-c	detect and clean (default: detect only)
+-h  help
 -v	version
 ```
 
 ## Examples
 
-Detect from current folder.
+Detect file.
 
-    dephage
-
-Detect from selected folder.
+    dephage documents/maya/file.ma
+	    	
+Detect folder and all sub-folders.
 
     dephage documents/maya
+    
+Detect and clean file.
 
-Detect and clean from current folder.
+    dephage -c documents/maya/file.ma
+		
+Detect and clean folder and all subfolders.
 
-    dephage -c
-
-Detect and clean selected folder.
-
-    `dephage -c documents/maya`
-
-
-
-
-
-
-
-
+    dephage -c documents/maya
