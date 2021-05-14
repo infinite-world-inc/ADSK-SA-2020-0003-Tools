@@ -36,13 +36,20 @@ var (
 )
 
 func main() {
+	versionFlag := flag.Bool("v", false, "version")
 	cleanFlag = flag.Bool("c", false, "detect and clean (default is detect only)")
 
 	flag.Usage = func() {
-		fmt.Println("Usage: dephage [-c] [root folder]")
+		fmt.Println("Usage: dephage [-c | -v] [root-folder]")
+		fmt.Println("Version: v1.1.0")
 		fmt.Println()
 		fmt.Println("Detects and optionally cleans the ADSK-SA-2020-0003 Autodesk Maya virus.")
+		fmt.Println("\nInfected text .ma and .mb files will be cleaned and the original file")
+		fmt.Println("  renamed with a .INFECTED extension.")
+		fmt.Println("\nInfected binary .mb files will NOT be cleaned and the file")
+		fmt.Println("  renamed with a .INFECTED extension.")
 		fmt.Println()
+		fmt.Println("Flags:")
 		flag.PrintDefaults()
 		fmt.Println()
 		fmt.Println("Examples:")
@@ -60,6 +67,11 @@ func main() {
 	}
 
 	flag.Parse()
+
+	if *versionFlag {
+		fmt.Println("dephage v1.1.0")
+		return
+	}
 
 	pathArg := flag.Arg(0)
 	if pathArg == "" {
@@ -115,15 +127,17 @@ func processFile(path string, fi os.FileInfo, err error) error {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if detectFile(path) {
-			if *cleanFlag {
-				fmt.Println("INFECTED and CLEANING:", path)
-				if err := cleanFile(path); err != nil {
-					fmt.Println("INFECTED unable to clean:", path)
-				}
-			} else {
-				fmt.Println("INFECTED:", path)
+		isText, found := detectFile(path)
+		if !found {
+			return
+		}
+		if *cleanFlag {
+			fmt.Println("INFECTED and CLEANING:", path)
+			if err := cleanFile(path, isText); err != nil {
+				fmt.Println("INFECTED unable to clean:", path)
 			}
+		} else {
+			fmt.Println("INFECTED:", path)
 		}
 	}()
 
@@ -162,23 +176,26 @@ func cleanHomeDir() {
 	os.Remove(path.Join(home, "Documents", "maya", "scripts", "userSetup.mel"))
 }
 
-func detectFile(file string) bool {
+func detectFile(file string) (bool, bool) {
 	content, err := os.ReadFile(file)
 	if err != nil {
 		fmt.Println("ERROR: unable to read", file)
+		return false, false
 	}
+
 	found := bytes.Contains(content, []byte("phage"))
-	if found && !util.IsText(content) {
-		fmt.Println("INFECTED Unable to clean:", file)
-		return false
-	}
-	return found
+	isText := util.IsText(content)
+	return isText, found
 }
 
-func cleanFile(file string) error {
+func cleanFile(file string, isText bool) error {
 	infectedName := file + ".INFECTED"
 	if err := os.Rename(file, infectedName); err != nil {
 		return err
+	}
+
+	if !isText {
+		return nil
 	}
 
 	fin, err := os.Open(infectedName)
