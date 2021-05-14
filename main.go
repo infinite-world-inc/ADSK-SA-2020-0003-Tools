@@ -41,7 +41,7 @@ func main() {
 
 	flag.Usage = func() {
 		fmt.Println("Usage: dephage [-c | -v] <file-path>|<folder-path>")
-		fmt.Println("Version: v1.2.0")
+		fmt.Println("Version: v1.2.1")
 		fmt.Println()
 		fmt.Println("Detects and optionally cleans the ADSK-SA-2020-0003 Autodesk Maya virus.")
 		fmt.Println("\nInfected text .ma and .mb files will be cleaned and the original file")
@@ -69,7 +69,7 @@ func main() {
 	flag.Parse()
 
 	if *versionFlag {
-		fmt.Println("dephage v1.2.0")
+		fmt.Println("dephage v1.2.1")
 		return
 	}
 
