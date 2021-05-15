@@ -168,7 +168,17 @@ func detectHomeDir() bool {
 		return true
 	}
 
+	f = path.Join(home, "Documents", "maya", "scripts", "vaccine.pyc")
+	if _, err := os.Stat(f); !os.IsNotExist(err) {
+		return true
+	}
+
 	f = path.Join(home, "Documents", "maya", "scripts", "userSetup.py")
+	if _, err := os.Stat(f); !os.IsNotExist(err) {
+		return true
+	}
+
+	f = path.Join(home, "Documents", "maya", "scripts", "userSetup.pyc")
 	if _, err := os.Stat(f); !os.IsNotExist(err) {
 		return true
 	}
