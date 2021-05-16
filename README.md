@@ -31,9 +31,9 @@ We advise you use this code to construct inline mitigation tools that automate t
 ## Flags
 
 ```
--c	detect and clean (default: detect only)
--h  help
--v	version
+-c    detect and clean (default: detect only)
+-h    help
+-v    version
 ```
 
 ## Examples
