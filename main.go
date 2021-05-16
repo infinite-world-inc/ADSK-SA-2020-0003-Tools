@@ -19,6 +19,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -28,6 +29,10 @@ import (
 	"sync"
 
 	"golang.org/x/tools/godoc/util"
+)
+
+const (
+	version = "v1.3.0"
 )
 
 var (
@@ -41,7 +46,7 @@ func main() {
 
 	flag.Usage = func() {
 		fmt.Println("Usage: dephage [-c | -v] <file-path>|<folder-path>")
-		fmt.Println("Version: v1.2.1")
+		fmt.Println("\nVersion:", version)
 		fmt.Println()
 		fmt.Println("Detects and optionally cleans the ADSK-SA-2020-0003 Autodesk Maya virus.")
 		fmt.Println("\nInfected text .ma and .mb files will be cleaned and the original file")
@@ -69,7 +74,7 @@ func main() {
 	flag.Parse()
 
 	if *versionFlag {
-		fmt.Println("dephage v1.2.1")
+		fmt.Println("dephage", version)
 		return
 	}
 
@@ -147,8 +152,19 @@ func processFile(path string) {
 			} else {
 				fmt.Println("INFECTED and RENAMING:", path)
 			}
+
 			if err := cleanFile(path, isText); err != nil {
-				fmt.Println("INFECTED unable to clean:", path)
+				fmt.Printf("INFECTED unable to clean %q: %v\n", path, err)
+				os.Remove(path)
+				return
+			}
+
+			// validation check
+			if isText {
+				if _, found = detectFile(path); found {
+					fmt.Printf("Validation failed: INFECTED unable to clean %q\n", path)
+					os.Remove(path)
+				}
 			}
 		} else {
 			fmt.Println("INFECTED:", path)
@@ -236,6 +252,8 @@ func cleanFile(file string, isText bool) error {
 
 	scanner := bufio.NewScanner(fin)
 	ignore := 0
+	found_vaccine_gene, found_breed_gene := false, false
+
 	for scanner.Scan() {
 		if ignore > 0 {
 			ignore--
@@ -243,17 +261,24 @@ func cleanFile(file string, isText bool) error {
 		}
 
 		line := scanner.Text()
-		if line == "createNode script -n \"vaccine_gene\";" {
+
+		if strings.Contains(line, "createNode script -n") && strings.Contains(line, "vaccine_gene") {
+			found_vaccine_gene = true
 			ignore = 7
 			continue
 		}
 
-		if line == "createNode script -n \"breed_gene\";" {
+		if strings.Contains(line, "createNode script -n") && strings.Contains(line, "breed_gene") {
+			found_breed_gene = true
 			ignore = 4
 			continue
 		}
 
 		fout.WriteString(line + "\n")
+	}
+
+	if !found_vaccine_gene || !found_breed_gene {
+		return errors.New("unable to locate virus")
 	}
 
 	return nil
