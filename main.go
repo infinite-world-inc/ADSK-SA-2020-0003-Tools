@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	version = "v1.3.0"
+	version = "v1.3.1"
 )
 
 var (
@@ -223,7 +223,7 @@ func detectFile(file string) (bool, bool) {
 		return false, false
 	}
 
-	found := bytes.Contains(content, []byte("phage"))
+	found := bytes.Contains(content, []byte("vaccine.phage()"))
 	isText := util.IsText(content)
 	return isText, found
 }
